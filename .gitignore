@@ -2,3 +2,6 @@ data/
 .ipynb_checkpoints
 .bin
 .idea/
+*mlflowdb
+*mlflow.db
+*/.DS_Store

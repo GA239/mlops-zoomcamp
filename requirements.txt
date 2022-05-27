@@ -1,5 +1,12 @@
+protobuf<4.0.0
 pandas
 seaborn
 matplotlib
 pyarrow
 sklearn
+jupyter
+hyperopt
+xgboost
+fastparquet
+boto3
+mlflow
