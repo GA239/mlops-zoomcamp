@@ -1,9 +1,9 @@
 protobuf<4.0.0
+scikit-learn==1.0.2
 pandas
 seaborn
 matplotlib
 pyarrow
-sklearn
 jupyter
 hyperopt
 xgboost
