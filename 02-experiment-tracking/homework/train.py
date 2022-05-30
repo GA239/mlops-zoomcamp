@@ -23,7 +23,7 @@ def run(data_path):
         # for k, v in params.items():
         #     mlflow.log_param(k, v)
 
-        mlflow.sklearn.autolog()
+        # mlflow.sklearn.autolog()
         mlflow.log_param("data_path", data_path)
 
         X_train, y_train = load_pickle(os.path.join(data_path, "train.pkl"))
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    mlflow.set_tracking_uri("sqlite:///mlflow.db")
-    mlflow.set_experiment("ag-nyc-taxi-experiment")
+    mlflow.set_tracking_uri("sqlite:///run_folder/mlflow.db")
+    mlflow.set_experiment("sdfdsf")
 
     run(args.data_path)

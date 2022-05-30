@@ -8,12 +8,16 @@ from hyperopt.pyll import scope
 from mlflow.entities import ViewType
 from mlflow.tracking import MlflowClient
 from sklearn.ensemble import RandomForestRegressor
+from mlflow.exceptions import MlflowException
 from sklearn.metrics import mean_squared_error
+import uuid
 
-HPO_EXPERIMENT_NAME = "random-forest-hyperopt"
-EXPERIMENT_NAME = "random-forest-best-models"
+HPO_EXPERIMENT_NAME = "random-forest-hyperopt_01"
+EXPERIMENT_NAME = f"random-forest-best-models_final_{uuid.uuid4()}"
+print(EXPERIMENT_NAME)
+MLFLOW_TRACKING_URI = "sqlite:///run_folder/mlflow.db"
 
-mlflow.set_tracking_uri("http://127.0.0.1:5000")
+mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 mlflow.set_experiment(EXPERIMENT_NAME)
 mlflow.sklearn.autolog()
 
@@ -50,7 +54,7 @@ def train_and_log_model(data_path, params):
 
 def run(data_path, log_top):
 
-    client = MlflowClient()
+    client = MlflowClient(tracking_uri=MLFLOW_TRACKING_URI)
 
     # retrieve the top_n model runs and log the models to MLflow
     experiment = client.get_experiment_by_name(HPO_EXPERIMENT_NAME)
@@ -65,10 +69,35 @@ def run(data_path, log_top):
 
     # select the model with the lowest test RMSE
     experiment = client.get_experiment_by_name(EXPERIMENT_NAME)
-    # best_run = client.search_runs( ...  )[0]
+    best_run = client.search_runs(
+        experiment_ids=experiment.experiment_id,
+        run_view_type=ViewType.ACTIVE_ONLY,
+        max_results=1,
+        order_by=["metrics.test_rmse ASC"])[0]
 
     # register the best model
     # mlflow.register_model( ... )
+
+    print("#"*30)
+    print(best_run.info.run_id)
+    # print("#"*30)
+    # print(best_run.data)
+    # print("#"*30)
+    # print(best_run.to_dictionary())
+    # print("#"*30)
+    # # print(client.list_run_infos(experiment_id=experiment.experiment_id))
+    # run_id = client.list_run_infos(experiment_id='1')[0].run_id
+    # print(f"runs:/{best_run.run_id}/models")
+    mlflow.register_model(
+        model_uri=f"runs:/{best_run.info.run_id}/models",
+        name='best_test_rmse'
+    )
+
+    model_name = 'best_test_rmse'
+    latest_versions = client.get_latest_versions(name=model_name)
+
+    for version in latest_versions:
+        print(f"version: {version.version}, stage: {version.current_stage}")
 
 
 if __name__ == '__main__':
@@ -81,10 +110,11 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         "--top_n",
-        default=5,
+        default=1,
         type=int,
         help="the top 'top_n' models will be evaluated to decide which model to promote."
     )
     args = parser.parse_args()
 
     run(args.data_path, args.top_n)
+
