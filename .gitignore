@@ -6,3 +6,4 @@ data/
 *mlflow.db
 */.DS_Store
 mlruns/
+run_folder/
