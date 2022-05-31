@@ -5,3 +5,4 @@ data/
 *mlflowdb
 *mlflow.db
 */.DS_Store
+mlruns/
